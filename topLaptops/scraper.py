@@ -1,16 +1,14 @@
-from topLaptops import mongo
+from topLaptops import app, mongo
 import requests
 import time
 from bs4 import BeautifulSoup
-
-MAX_RETRIES = 5
 
 def scrapeLaptops():
     url = "http://www.amazon.in/s/?fst=as%3Aoff&rh=n%3A976392031%2Cn%3A!976393031%2Cn%3A1375424031%2Cp_n_condition-type%3A8609960031&ie=UTF8"
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36'}
     
     laptops = []
-    retriesLeft = MAX_RETRIES
+    retriesLeft = app.config['SCRAPER_MAX_RETRIES']
     while(retriesLeft):
         try:
             page = requests.get(url, headers=headers)
@@ -27,7 +25,6 @@ def scrapeLaptops():
 
             # Get all 24 laptops
             resultDivs = soup.find_all("li", { "class" : "s-result-item" })
-            print(len(resultDivs))
 
             for resultDiv in resultDivs:
                 # Scrape the product name:
