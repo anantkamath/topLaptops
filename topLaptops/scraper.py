@@ -43,7 +43,7 @@ def scrapeLaptops():
                 rating = rating[:i]
 
             # Scrape number of reviews
-            numReviews = resultDiv.find_all("a")[-1].contents[0]
+            numReviews = resultDiv.find_all("a", {"class": "a-size-small a-link-normal a-text-normal"})[-1].contents[0]
 
             ''' 
                 Scrape the product id (ASIN: Amazon Identifying Number). 
