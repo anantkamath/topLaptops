@@ -10,68 +10,58 @@ def scrapeLaptops():
     laptops = []
     retriesLeft = app.config['SCRAPER_MAX_RETRIES']
     while(retriesLeft):
-        try:
-            page = requests.get(url, headers=headers)
-            if page.status_code==200:
-                break
-            time.sleep(3)
-        except:
-            # TODO log: requests error e
-            # print(e)
-            pass        
+        page = requests.get(url, headers=headers)
+        if page.status_code==200:
+            break
+        time.sleep(3)      
     if page:
-        try:
-            soup = BeautifulSoup(page.content, "lxml")
+        soup = BeautifulSoup(page.content, "lxml")
 
-            # Get all 24 laptops
-            resultDivs = soup.find_all("li", { "class" : "s-result-item" })
+        # Get all 24 laptops
+        resultDivs = soup.find_all("li", { "class" : "s-result-item" })
 
-            for resultDiv in resultDivs:
-                # Scrape the product name:
-                name = resultDiv.find("h2", { "class" : "s-access-title" }).contents[0]
-                
-                # Price
-                priceSpan = resultDiv.find("span", {"class": "s-price"})
-                # If the listing contains the price (some listings have only offers, not prices)
-                if priceSpan:
-                    price = priceSpan.contents[1]
-                # If not, we scrape the 'lowest offer'
-                else:
-                    priceSpan = resultDiv.find_all("span", {"class": "a-color-price"})[1]
-                    price = priceSpan.contents[2]
-                price = price.strip(',')
+        for resultDiv in resultDivs:
+            # Scrape the product name:
+            name = resultDiv.find("h2", { "class" : "s-access-title" }).contents[0]
+            
+            # Price
+            priceSpan = resultDiv.find("span", {"class": "s-price"})
+            # If the listing contains the price (some listings have only offers, not prices)
+            if priceSpan:
+                price = priceSpan.contents[1]
+            # If not, we scrape the 'lowest offer'
+            else:
+                priceSpan = resultDiv.find_all("span", {"class": "a-color-price"})[1]
+                price = priceSpan.contents[2]
+            price = price.strip(',')
 
-                # Rating eg. "3 out of 5"
-                rating = resultDiv.find("i", {"class": "a-icon-star"}).contents[0].contents[0]
-                # Strip the " out of 5" suffix
-                i = rating.find(' ')
-                if(i > 0):
-                    rating = rating[:i]
+            # Rating eg. "3 out of 5"
+            rating = resultDiv.find("i", {"class": "a-icon-star"}).contents[0].contents[0]
+            # Strip the " out of 5" suffix
+            i = rating.find(' ')
+            if(i > 0):
+                rating = rating[:i]
 
-                # Scrape number of reviews
-                numReviews = resultDiv.find_all("a")[-1].contents[0]
+            # Scrape number of reviews
+            numReviews = resultDiv.find_all("a")[-1].contents[0]
 
-                ''' 
-                    Scrape the product id (ASIN: Amazon Identifying Number). 
-                    Useful for generating the product URL later
-                '''
-                asin = resultDiv["data-asin"]                
+            ''' 
+                Scrape the product id (ASIN: Amazon Identifying Number). 
+                Useful for generating the product URL later
+            '''
+            asin = resultDiv["data-asin"]                
 
-                laptop = {
-                        'asin': asin,
-                        'name': name,
-                        'price': price,
-                        'rating': rating,
-                        'numReviews': numReviews
-                        }
-     
-                laptops.append(laptop)
-        except Exception as e:
-            print(e)
-            # TODO log: parser error e
+            laptop = {
+                    'asin': asin,
+                    'name': name,
+                    'price': price,
+                    'rating': rating,
+                    'numReviews': numReviews
+                    }
+ 
+            laptops.append(laptop)
     else:
-        pass
-        # TODO log: could not scrape after MAX_RETRIES
+        app.logger.error('Scraping failed. Retried' + str(app.config['SCRAPER_MAX_RETRIES']) + ' times')
     return laptops
  
 def updateDb():
@@ -79,6 +69,3 @@ def updateDb():
     laptops = scrapeLaptops()
     mongo.db.laptops.remove({})
     mongo.db.laptops.insert_many(laptops)
-
-if __name__ == "__main__":
-    print(scrapeLaptops())
