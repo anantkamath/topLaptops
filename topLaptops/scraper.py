@@ -35,7 +35,7 @@ def scrapeLaptop(laptop):
                 laptop['ram'] = row.contents[1].contents[0]
             elif row.contents[0].contents[0] == 'Hard Drive Size':
                 laptop['hdd'] = row.contents[1].contents[0]
-    #print(laptop)
+    # print(laptop)
     return laptop
 
 
@@ -68,6 +68,7 @@ def scrapeSearchPage(pageNumber, numberOfLaptops):
 
         for i in range(numberOfLaptops):
             resultDiv = resultDivs[i]
+            # print(resultDiv.encode('utf-8'))
             # Scrape the product name:
             name = resultDiv.find(
                 'h2', {'class': 's-access-title'}).contents[0]
@@ -94,8 +95,12 @@ def scrapeSearchPage(pageNumber, numberOfLaptops):
                 rating = rating[:i]
 
             # Scrape number of reviews
-            numReviews = int(resultDiv.find_all(
-                'a', {'class': 'a-size-small a-link-normal a-text-normal'})[-1].contents[0].replace(',', ''))
+            for link in resultDiv.find_all('a', {'class': 'a-size-small a-link-normal a-text-normal'}):
+                if link['href'].endswith('customerReviews'):
+                    numReviews = int(link.contents[0].replace(',', ''))
+
+            if not numReviews:
+                numReviews = 0
 
             # Scrape the product id (ASIN: Amzon Standard Identifying Number).
             # (Useful for generating the product URL later)
