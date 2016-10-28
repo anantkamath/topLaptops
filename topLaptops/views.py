@@ -3,11 +3,13 @@ from flask import jsonify
 from .scraper import updateDb
 from threading import Thread
 
+
 @app.route('/refreshDb')
 def refreshDb():
     thr = Thread(target=updateDb)
     thr.start()
     return 'DB refresh/scraping started', 202
+
 
 @app.route('/laptops')
 def getLaptops():
