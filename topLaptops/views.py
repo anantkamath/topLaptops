@@ -1,11 +1,13 @@
 from topLaptops import app, mongo
 from flask import jsonify
 from .scraper import updateDb
+from threading import Thread
 
 @app.route('/refreshDb')
 def refreshDb():
-    updateDb()
-    return 'DB refresh/scraping started'
+    thr = Thread(target=updateDb)
+    thr.start()
+    return 'DB refresh/scraping started', 202
 
 @app.route('/laptops')
 def getLaptops():

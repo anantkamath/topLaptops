@@ -79,7 +79,10 @@ def scrapeLaptops():
     laptops = []
     laptopsToScrape = app.config['SCRAPER_NUM_LAPTOPS']
     
-    # Divide scraping task into parallel jobs
+    '''
+        Amzon returns 24 results per page, we need to split our scraping
+        into several pages
+    '''
     jobs = []
     for i in range(laptopsToScrape//24):
         jobs.append((i+1, 24))
@@ -98,7 +101,7 @@ def scrapeLaptops():
     return laptops
  
 def updateDb():
-    #time.sleep(10)
-    laptops = scrapeLaptops()
-    mongo.db.laptops.remove({})
-    mongo.db.laptops.insert_many(laptops)
+    with app.app_context():
+        laptops = scrapeLaptops()
+        mongo.db.laptops.remove({})
+        mongo.db.laptops.insert_many(laptops)
