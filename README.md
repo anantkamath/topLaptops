@@ -25,7 +25,7 @@ The server should be available on **http://localhost:5000**
 
 ### Installing dependencies (only if running locally)
 ```
-$ pip install requirements.txt
+$ pip install -r requirements.txt
 ```
 ### Configuration
 You can edit the following configurations in topLaptops/config.cfg
@@ -43,6 +43,8 @@ You can edit the following configurations in topLaptops/config.cfg
 * requests
 * beautifulsoup4
 * lxml
+
+* docker-compose to build and run this as dockerized services
 
 ## Implementation Details
 The laptops are scraped from the search pages and detail pages of each individual page in a parallel fashion using thread pools.
