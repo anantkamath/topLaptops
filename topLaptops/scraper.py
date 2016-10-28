@@ -4,12 +4,41 @@ import time
 from bs4 import BeautifulSoup
 from multiprocessing.dummy import Pool as ThreadPool
 
+def scrapeLaptop(laptop):
+    '''
+    Scrapes single laptop
+    '''
+    url = "http://amazon.in/dp/"+laptop['asin']
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36'}
+    
+    retriesLeft = app.config['SCRAPER_MAX_RETRIES']
+
+    while retriesLeft:
+        page = requests.get(url, headers=headers)
+        if page.status_code == 200:
+            break
+        time.sleep(3)
+    if page:
+        soup = BeautifulSoup(page.content, "lxml")
+
+        techTable = soup.find("div", {"class": "section techD"}).find("tbody")
+        for row in techTable.find_all("tr"):
+            if row.contents[0] == "Processor Speed":
+                print('cpu')
+                laptop['cpu'] = row.contents[1]
+            elif row.contents[0] == "RAM Size":
+                laptop.['ram'] = row.contents[1]
+            elif row.contents[0] == "Hard Drive Size":
+                laptop.['hdd'] = row.contents[1]
+    print(laptop)
+    return laptop
 
 def scrapeSearchPage(pageNumber, numberOfLaptops):
-    """
+    '''
     Scrapes a single page from Amzon search results (max 24 laptops)
 
-    """
+    '''
     if numberOfLaptops <= 0:
         return []
 
@@ -80,9 +109,18 @@ def scrapeSearchPage(pageNumber, numberOfLaptops):
     else:
         app.logger.error('Scraping failed. Retried' +
                          str(app.config['SCRAPER_MAX_RETRIES']) + ' times')
-    print(laptops)
-    return laptops
+    #print(laptops)
 
+    pool = ThreadPool(8)
+    results = pool.map(scrapeLaptop, laptops)
+    pool.close()
+    pool.join()
+
+    return results
+
+def scoreLaptops(laptops):
+    for laptop in laptops:
+        score = (100000/laptop.price)*laptop.rating + 5
 
 def scrapeLaptops():
     '''
