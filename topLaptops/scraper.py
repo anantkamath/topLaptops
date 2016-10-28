@@ -38,7 +38,7 @@ def scrapeLaptops():
                 else:
                     priceSpan = resultDiv.find_all("span", {"class": "a-color-price"})[1]
                     price = priceSpan.contents[2]
-                price = price.strip(',')
+                price = float(price.replace(',',''))
 
                 # Rating eg. "3 out of 5"
                 rating = resultDiv.find("i", {"class": "a-icon-star"}).contents[0].contents[0]
