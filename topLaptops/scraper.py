@@ -9,7 +9,6 @@ def scrapeSearchPage(pageNumber, numberOfLaptops):
     Scrapes a single page from Amzon search results (max 24 laptops)
 
     """
-    print(pageNumber,numberOfLaptops)
     if numberOfLaptops <=0:
         return []
 
@@ -79,15 +78,23 @@ def scrapeSearchPage(pageNumber, numberOfLaptops):
 def scrapeLaptops():
     laptops = []
     laptopsToScrape = app.config['SCRAPER_NUM_LAPTOPS']
-    currPage = 1
-    while(len(laptops) < laptopsToScrape):
-        if(laptopsToScrape - len(laptops) >= 24):
-            result = (scrapeSearchPage(currPage, 24))
-        else:
-            result = (scrapeSearchPage(currPage, laptopsToScrape - len(laptops)))
-        for r in result:
-            laptops.append(r)
-        currPage+=1
+    
+    # Divide scraping task into parallel jobs
+    jobs = []
+    for i in range(laptopsToScrape//24):
+        jobs.append((i+1, 24))
+    if(laptopsToScrape%24):
+        jobs.append((len(jobs)+1, laptopsToScrape%24))
+    
+    # Use a thread pool to parallelize the scraping
+    pool = ThreadPool(8)
+    results = pool.starmap(scrapeSearchPage, jobs)
+    pool.close()
+    pool.join()
+
+    for result in results:
+        laptops += result
+    
     return laptops
  
 def updateDb():
