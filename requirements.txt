@@ -3,3 +3,4 @@ pymongo
 Flask-PyMongo
 requests
 beautifulsoup4
+lxml
