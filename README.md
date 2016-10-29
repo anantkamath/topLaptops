@@ -71,5 +71,5 @@ The square of ratings is used to punish poorly rated laptops and favor highly ra
 The benchmark price can perhaps be calculated by some sort of averaging or linear regression to give a better idea of the laptop being overpriced or not.
 
 ## Future improvements/ TODO:
-* The service depends on python threads for running scraping tasks in the background, with a high degree of parallelism, but keeping track of background tasks and state between requests is difficult in Flask. On a larger scale, **Celery+RabbitMQ** or **Celery+Redis** can be considered to take the weight of the server and allow better tracking of async/background tasks.
+* The service depends on python threads for running scraping tasks in the background, with a high degree of parallelism, but keeping track of background tasks and state between requests is difficult in Flask. On a larger scale, **Celery+RabbitMQ** or **Celery+Redis** can be considered to take the weight off the server and allow better tracking of async/background tasks.
 * Further the scraper can be broken down in to individual parts that can be containerized and deployed in a distributed fashion to achieve efficient horizontal scaling
